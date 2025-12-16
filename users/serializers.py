@@ -83,9 +83,48 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         role = data.get("role") or "customer"
         data["role"] = role  # ensure role is set in validated_data
 
+        vendor_data = data.get("vendor_profile")
+
         # if vendor → vendor_profile must be provided
-        if role == "vendor" and not data.get("vendor_profile"):
-            errors["vendor_profile"] = "Vendor details are required when registering as a vendor."
+        if role == "vendor":
+
+            if not vendor_data:
+                errors["vendor_profile"] = "Vendor details are required when registering as a vendor."
+            else:
+                vendor_errors = {}
+
+                gst = vendor_data.get("gst_number")
+                pan = vendor_data.get("pan_number")
+                account = vendor_data.get("bank_account_number")
+                phone = vendor_data.get("shop_phone")
+                reg_addr = vendor_data.get("registered_address")
+                pickup_addr = vendor_data.get("pickup_address")
+
+                if gst and VendorProfile.objects.filter(gst_number__iexact=gst).exists():
+                    vendor_errors["gst_number"] = "This GST number is already registered."
+
+                if pan and VendorProfile.objects.filter(pan_number__iexact=pan).exists():
+                    vendor_errors["pan_number"] = "This PAN number is already registered."
+
+                if account and VendorProfile.objects.filter(bank_account_number=account).exists():
+                    vendor_errors["bank_account_number"] = "This bank account number is already registered."
+
+                if phone and VendorProfile.objects.filter(shop_phone=phone).exists():
+                    vendor_errors["shop_phone"] = "This shop phone number is already registered."
+
+                if reg_addr and VendorProfile.objects.filter(
+                    registered_address__iexact=reg_addr
+                ).exists():
+                    vendor_errors["registered_address"] = "This registered address is already registered."
+
+                if pickup_addr and VendorProfile.objects.filter(
+                    pickup_address__iexact=pickup_addr
+                ).exists():
+                    vendor_errors["pickup_address"] = "This pickup address is already registered."
+
+                if vendor_errors:
+                    errors["vendor_profile"] = vendor_errors
+
 
         if errors:
             raise serializers.ValidationError(errors)
