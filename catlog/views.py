@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status, filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
@@ -71,8 +71,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         # If vendor is VendorProfile instead:
         # serializer.save(vendor=user.vendor_profile)
 
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
