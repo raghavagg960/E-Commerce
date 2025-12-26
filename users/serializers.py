@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from .models import VendorProfile, User
+from .models import VendorProfile, User, Address
 
 
 User = get_user_model()
@@ -152,6 +152,23 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = [
+            'id',
+            'user',
+            'street_address',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+            'is_default',
+        ]
+        read_only_fields = ['id', 'user']
+
 
 
   

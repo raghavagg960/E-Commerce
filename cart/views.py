@@ -7,11 +7,15 @@ from .models import Cart, CartItem
 from .serializers import CartSerializer
 from catlog.models import Product
 
-class CartViewSet(viewsets.ViewSet):
+class CartViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    serializer_class = CartSerializer
+
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
 
     # GET /cart/
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         user = request.user
 
         if user.role != 'customer':
@@ -21,7 +25,7 @@ class CartViewSet(viewsets.ViewSet):
             )
 
         cart, _ = Cart.objects.get_or_create(user=user)
-        serializer = CartSerializer(cart)
+        serializer = self.get_serializer(cart)
         return Response(serializer.data)
 
     # POST /cart/add/

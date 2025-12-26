@@ -7,6 +7,7 @@ from django.db import transaction
 from .models import Order, OrderItem
 from .serializers import OrderSerializer
 from cart.models import Cart
+from users.models import Address
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -47,6 +48,18 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Validate Address
+        address_id = request.data.get('address_id')
+        shipping_address = None
+        if address_id:
+            try:
+                shipping_address = Address.objects.get(id=address_id, user=user)
+            except Address.DoesNotExist:
+                return Response(
+                    {"detail": "Invalid address or address does not belong to you."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         total_amount = 0
         order_items_data = []
 
@@ -73,7 +86,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Create order
         order = Order.objects.create(
             user=user,
-            total_amount=total_amount
+            total_amount=total_amount,
+            shipping_address=shipping_address
         )
 
         # Create order items + reduce stock
@@ -125,4 +139,5 @@ class OrderViewSet(viewsets.ModelViewSet):
             })
 
         return Response(data)
+
 

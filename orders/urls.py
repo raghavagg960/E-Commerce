@@ -8,5 +8,6 @@ order_vendor = OrderViewSet.as_view({'get': 'vendor_orders'})
 urlpatterns = [
     path('', order_create),        # POST /orders/
     path('my/', order_my),         # GET  /orders/my/
-    path('vendor/', order_vendor)  # GET  /orders/vendor/
+    path('vendor/', order_vendor), # GET  /orders/vendor/
+    path('<int:pk>/', OrderViewSet.as_view({'get': 'retrieve'})), # GET /orders/<id>/
 ]

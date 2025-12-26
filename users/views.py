@@ -4,10 +4,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, AddressSerializer
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import AllowAny
-
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .models import Address
 
 
 User = get_user_model()
@@ -106,3 +106,15 @@ class UserViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
+
+class AddressViewSet(viewsets.ModelViewSet):
+    serializer_class = AddressSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Return only addresses for the current user
+        return Address.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically assign the current user
+        serializer.save(user=self.request.user)
